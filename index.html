@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>A4 Data Visualization — Organizational Structure &amp; Global Connectivity</title>
+<meta name="description" content="Data Visualization Assignment 4: HR organizational hierarchy treemap and dendrogram, plus global airline route network spring and circular graph layouts."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+/* ── Reset & tokens ──────────────────────────────────────────────────────── */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0B0F1A; --surface:#111827; --surface2:#1a2236;
+  --primary:#1E3A8A; --secondary:#0EA5A4; --accent:#22D3EE;
+  --text:#E5E7EB; --muted:#9CA3AF; --border:#1E3A8A33;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.6;min-height:100vh}
+
+/* ── Animated background ─────────────────────────────────────────────────── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 20% 10%,#1E3A8A18 0%,transparent 60%),
+             radial-gradient(ellipse 60% 50% at 80% 80%,#0EA5A415 0%,transparent 60%);
+  pointer-events:none;
+}
+
+/* ── Nav ─────────────────────────────────────────────────────────────────── */
+nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(11,15,26,.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 40px;height:60px;
+}
+.nav-brand{font-weight:700;font-size:15px;color:var(--accent);letter-spacing:.5px}
+.nav-links{display:flex;gap:28px}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--accent)}
+
+/* ── Hero ────────────────────────────────────────────────────────────────── */
+.hero{
+  position:relative;z-index:1;
+  text-align:center;padding:80px 24px 60px;
+  max-width:900px;margin:0 auto;
+}
+.badge{
+  display:inline-block;background:var(--primary);color:var(--accent);
+  font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+  padding:4px 14px;border-radius:999px;margin-bottom:20px;
+  border:1px solid var(--accent)44;
+}
+.hero h1{font-size:clamp(28px,5vw,52px);font-weight:800;line-height:1.15;margin-bottom:16px}
+.hero h1 span{
+  background:linear-gradient(135deg,var(--secondary),var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero p{color:var(--muted);font-size:16px;max-width:620px;margin:0 auto 36px}
+.hero-stats{
+  display:flex;gap:32px;justify-content:center;flex-wrap:wrap;
+}
+.stat{text-align:center}
+.stat .num{font-size:32px;font-weight:800;color:var(--accent)}
+.stat .lbl{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ── Section headers ──────────────────────────────────────────────────────── */
+.section{position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:48px 24px}
+.section-head{margin-bottom:32px}
+.section-head .tag{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:6px;padding:4px 12px;font-size:12px;color:var(--secondary);
+  font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;
+}
+.section-head h2{font-size:26px;font-weight:700;margin-bottom:6px}
+.section-head p{color:var(--muted);font-size:14px;max-width:680px}
+.divider{height:1px;background:var(--border);max-width:1300px;margin:0 auto 0}
+
+/* ── Cards grid ──────────────────────────────────────────────────────────── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px}
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  overflow:hidden;transition:transform .25s,box-shadow .25s,border-color .25s;
+  text-decoration:none;color:inherit;display:flex;flex-direction:column;
+}
+.card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 20px 40px #00000055,0 0 0 1px var(--secondary)44;
+  border-color:var(--secondary)66;
+}
+.card-preview{
+  height:220px;overflow:hidden;position:relative;background:var(--bg);
+}
+.card-preview img{width:100%;height:100%;object-fit:cover;object-position:top left;transition:transform .4s}
+.card:hover .card-preview img{transform:scale(1.04)}
+.card-preview .overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,var(--surface) 0%,transparent 50%);
+}
+.card-preview .type-badge{
+  position:absolute;top:12px;left:12px;
+  background:var(--primary)cc;backdrop-filter:blur(6px);
+  border:1px solid var(--accent)44;border-radius:6px;
+  font-size:10px;font-weight:700;color:var(--accent);
+  padding:3px 10px;letter-spacing:.8px;text-transform:uppercase;
+}
+.card-body{padding:20px 22px 22px;flex:1;display:flex;flex-direction:column;gap:8px}
+.card-title{font-size:16px;font-weight:700;color:var(--text)}
+.card-desc{font-size:13px;color:var(--muted);line-height:1.6;flex:1}
+.card-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.pill{
+  font-size:11px;font-weight:500;padding:2px 10px;border-radius:999px;
+  background:var(--primary)33;color:var(--secondary);border:1px solid var(--primary)66;
+}
+.card-cta{
+  display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;
+  color:var(--accent);margin-top:12px;
+}
+.card-cta svg{transition:transform .2s}
+.card:hover .card-cta svg{transform:translateX(4px)}
+
+/* ── Treemap iframe card special ─────────────────────────────────────────── */
+.card-iframe .card-preview{height:280px}
+.card-iframe .card-preview iframe{
+  width:100%;height:100%;border:none;pointer-events:none;
+  transform-origin:top left;
+}
+
+/* ── Comparison table ─────────────────────────────────────────────────────── */
+.compare-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:20px;
+}
+@media(max-width:700px){.compare-grid{grid-template-columns:1fr}}
+.compare-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;
+}
+.compare-card h3{font-size:16px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.compare-card h3 .dot{width:10px;height:10px;border-radius:50%}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--border)}
+th{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.5px;text-transform:uppercase}
+td{color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+
+/* ── Conclusion ──────────────────────────────────────────────────────────── */
+.conclusion{
+  background:linear-gradient(135deg,var(--primary)22,var(--secondary)11);
+  border:1px solid var(--border);border-radius:16px;padding:36px 40px;
+  max-width:1300px;margin:0 auto 48px;position:relative;z-index:1;
+}
+.conclusion h2{font-size:22px;font-weight:700;margin-bottom:16px}
+.conclusion p{color:var(--muted);font-size:14px;line-height:1.8;max-width:800px}
+.conclusion ul{list-style:none;margin-top:16px;display:flex;flex-direction:column;gap:10px}
+.conclusion ul li{color:var(--muted);font-size:14px;padding-left:20px;position:relative;line-height:1.6}
+.conclusion ul li::before{content:'›';position:absolute;left:0;color:var(--accent);font-weight:700}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+footer{
+  position:relative;z-index:1;
+  border-top:1px solid var(--border);background:var(--surface);
+  text-align:center;padding:24px;font-size:12px;color:var(--muted);
+}
+footer strong{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav>
+  <span class="nav-brand">A4 DATA VIS</span>
+  <div class="nav-links">
+    <a href="#tree">Tree</a>
+    <a href="#graph">Graph</a>
+    <a href="#compare">Compare</a>
+    <a href="#conclusion">Conclusion</a>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <div class="badge">Assignment 4 &nbsp;·&nbsp; Data Visualization</div>
+  <h1>Organizational Structure<br/>&amp; <span>Global Connectivity</span></h1>
+  <p>A dual-lens exploration — the internal hierarchy of a company through HR data, and the worldwide airline route network through graph analysis.</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="num">311</div><div class="lbl">Employees</div></div>
+    <div class="stat"><div class="num">6</div><div class="lbl">Departments</div></div>
+    <div class="stat"><div class="num">265</div><div class="lbl">Airports</div></div>
+    <div class="stat"><div class="num">598</div><div class="lbl">Routes</div></div>
+    <div class="stat"><div class="num">4</div><div class="lbl">Visualizations</div></div>
+  </div>
+</div>
+
+<!-- ── Tree Section ── -->
+<div class="divider"></div>
+<section class="section" id="tree">
+  <div class="section-head">
+    <div class="tag">&#x1F333; Dataset 1 — HR Dataset</div>
+    <h2>Tree Visualizations</h2>
+    <p>The HR dataset is structured as a four-level hierarchy: <strong>Company → Department → Position → Employee</strong>. Two complementary tree layouts reveal its structure from different angles.</p>
+  </div>
+  <div class="cards">
+
+    <!-- Treemap card -->
+    <a href="visualizations/treemap.html" class="card">
+      <div class="card-preview">
+        <div class="type-badge">Interactive · Plotly</div>
+        <div style="width:100%;height:100%;background:linear-gradient(135deg,#1E3A8A,#0EA5A4,#22D3EE);display:flex;align-items:center;justify-content:center">
+          <svg width="180" height="120" viewBox="0 0 180 120">
+            <rect x="2"  y="2"  width="110" height="70" rx="4" fill="#1D4ED8" opacity=".9"/>
+            <rect x="116" y="2"  width="62"  height="32" rx="4" fill="#0EA5A4" opacity=".9"/>
+            <rect x="116" y="38" width="30"  height="34" rx="4" fill="#22D3EE" opacity=".9"/>
+            <rect x="150" y="38" width="28"  height="34" rx="4" fill="#1E3A8A" opacity=".9"/>
+            <rect x="2"  y="76" width="50"  height="42" rx="4" fill="#06B6D4" opacity=".9"/>
+            <rect x="56" y="76" width="70"  height="42" rx="4" fill="#0EA5A4" opacity=".9"/>
+            <rect x="130" y="76" width="48"  height="42" rx="4" fill="#2563EB" opacity=".9"/>
+            <text x="57"  y="42" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">Production</text>
+            <text x="147" y="20" fill="#fff" font-size="8"  text-anchor="middle">IT/IS</text>
+            <text x="131" y="58" fill="#fff" font-size="7"  text-anchor="middle">Sales</text>
+            <text x="27"  y="102" fill="#fff" font-size="7" text-anchor="middle">Admin</text>
+            <text x="91"  y="102" fill="#fff" font-size="7" text-anchor="middle">Software</text>
+            <text x="154" y="102" fill="#fff" font-size="7" text-anchor="middle">Executive</text>
+          </svg>
+        </div>
+        <div class="overlay"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Organizational Treemap</div>
+        <div class="card-desc">Interactive Plotly treemap. Area encodes headcount; colour gradient encodes average salary. Click to drill down from Company → Department → Position.</div>
+        <div class="card-meta">
+          <span class="pill">Plotly</span>
+          <span class="pill">Interactive</span>
+          <span class="pill">Hierarchy</span>
+          <span class="pill">Salary</span>
+        </div>
+        <div class="card-cta">Open Treemap <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+    </a>
+
+    <!-- Dendrogram card -->
+    <a href="visualizations/dendrogram.html" class="card">
+      <div class="card-preview">
+        <div class="type-badge">Static · Matplotlib</div>
+        <img src="visualizations/dendrogram.png" alt="Dendrogram preview"/>
+        <div class="overlay"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Hierarchical Dendrogram</div>
+        <div class="card-desc">Ward linkage clustering on salary, headcount and satisfaction score. Leaf colours encode department membership — revealing which positions are structurally similar.</div>
+        <div class="card-meta">
+          <span class="pill">Scipy</span>
+          <span class="pill">Ward Linkage</span>
+          <span class="pill">Clustering</span>
+        </div>
+        <div class="card-cta">Open Dendrogram <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ── Graph Section ── -->
+<div class="divider"></div>
+<section class="section" id="graph">
+  <div class="section-head">
+    <div class="tag">&#x2708;&#xFE0F; Dataset 2 — Routes Dataset</div>
+    <h2>Graph Visualizations</h2>
+    <p>A 600-row subset of the OpenFlights routes dataset forms a directed graph where airports are nodes and routes are edges. Two layout algorithms reveal different structural properties.</p>
+  </div>
+  <div class="cards">
+
+    <!-- Spring card -->
+    <a href="visualizations/graph_spring.html" class="card">
+      <div class="card-preview">
+        <div class="type-badge">Force-Directed · NetworkX</div>
+        <img src="visualizations/graph_spring.png" alt="Spring layout preview"/>
+        <div class="overlay"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Spring (Force-Directed) Layout</div>
+        <div class="card-desc">Fruchterman-Reingold algorithm. Hub airports self-organise to the centre. Node size = total degree; colour = in-degree. Top 12 hubs are labelled.</div>
+        <div class="card-meta">
+          <span class="pill">NetworkX</span>
+          <span class="pill">Directed</span>
+          <span class="pill">Hub Detection</span>
+        </div>
+        <div class="card-cta">Open Spring Layout <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+    </a>
+
+    <!-- Circular card -->
+    <a href="visualizations/graph_circular.html" class="card">
+      <div class="card-preview">
+        <div class="type-badge">Shell Layout · NetworkX</div>
+        <img src="visualizations/graph_circular.png" alt="Circular layout preview"/>
+        <div class="overlay"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Circular (Shell) Layout</div>
+        <div class="card-desc">Airports arranged in 3 concentric rings by degree tier — hubs innermost. Reveals the hub-and-spoke topology of the airline network at a glance.</div>
+        <div class="card-meta">
+          <span class="pill">Shell Layout</span>
+          <span class="pill">3 Tiers</span>
+          <span class="pill">Hub-and-Spoke</span>
+        </div>
+        <div class="card-cta">Open Circular Layout <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ── Comparison ── -->
+<div class="divider"></div>
+<section class="section" id="compare">
+  <div class="section-head">
+    <div class="tag">&#x1F50D; Analysis</div>
+    <h2>Tree vs. Graph — Comparison</h2>
+    <p>Contrasting the structural and visual properties of both visualization approaches.</p>
+  </div>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h3><span class="dot" style="background:#1D4ED8"></span>Structure Comparison</h3>
+      <table>
+        <thead><tr><th>Dimension</th><th>Tree (HR)</th><th>Graph (Routes)</th></tr></thead>
+        <tbody>
+          <tr><td>Type</td><td>Strict DAG</td><td>Directed cyclic</td></tr>
+          <tr><td>Depth</td><td>4 levels</td><td>Flat peers</td></tr>
+          <tr><td>Root</td><td>Single (Company)</td><td>None</td></tr>
+          <tr><td>Edges</td><td>Parent → child only</td><td>Any pair, directed</td></tr>
+          <tr><td>Density</td><td>Low (tree property)</td><td>Moderate (hubs)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="compare-card">
+      <h3><span class="dot" style="background:#0EA5A4"></span>Visual Technique Comparison</h3>
+      <table>
+        <thead><tr><th>Technique</th><th>Strength</th><th>Weakness</th></tr></thead>
+        <tbody>
+          <tr><td>Treemap</td><td>Size differences legible</td><td>Deep nesting loses context</td></tr>
+          <tr><td>Dendrogram</td><td>Reveals similarity clusters</td><td>Hard to read at scale</td></tr>
+          <tr><td>Spring Layout</td><td>Natural hub emergence</td><td>Non-deterministic</td></tr>
+          <tr><td>Circular Layout</td><td>Tier structure clear</td><td>Edge crossings clutter</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ── Conclusion ── -->
+<div class="divider" style="margin-bottom:48px"></div>
+<div class="conclusion" id="conclusion">
+  <h2>Conclusion</h2>
+  <p>This assignment explored two datasets under the unifying theme of <em>structure and connectivity</em> — one internal (organizational), one global (geographic). The visualizations collectively reveal:</p>
+  <ul>
+    <li><strong>Production dominates the HR hierarchy</strong> — ~60% of headcount — yet IT/IS commands the highest average salary, visible in the treemap's colour gradient.</li>
+    <li><strong>The dendrogram confirms departmental cohesion</strong> — IT/IS positions cluster tightly (similar salary and satisfaction), while Production spreads widely (high diversity).</li>
+    <li><strong>The route network is scale-free</strong> — a small number of hub airports connect the majority of routes, consistent with Barabási–Albert power-law behaviour.</li>
+    <li><strong>Layout choice matters</strong> — spring layout surfaces hubs organically, while circular layout makes the tier hierarchy immediately legible. Both views are necessary for complete understanding.</li>
+  </ul>
+</div>
+
+<!-- ── Footer ── -->
+<footer>
+  <strong>A4 Data Visualization</strong> &nbsp;·&nbsp; Theme: Organizational Structure &amp; Global Connectivity &nbsp;·&nbsp;
+  Built with Python · Plotly · NetworkX · Matplotlib · Scipy &nbsp;·&nbsp; April 2026
+</footer>
+
+</body>
+</html>

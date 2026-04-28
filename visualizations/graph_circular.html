@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Circular Layout — Global Route Network | A4 Data Visualization</title>
+<meta name="description" content="Circular shell layout of the global airline route network. Inner ring shows hub airports; outer rings show peripheral airports."/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0B0F1A;color:#E5E7EB;font-family:system-ui,sans-serif;display:flex;flex-direction:column;min-height:100vh}
+  header{background:#111827;border-bottom:1px solid #1E3A8A;padding:18px 32px}
+  header a{color:#22D3EE;text-decoration:none;font-size:13px;opacity:.8}
+  header a:hover{opacity:1}
+  h1{font-size:20px;font-weight:700;color:#E5E7EB;margin-top:4px}
+  .subtitle{font-size:13px;color:#9CA3AF;margin-top:2px}
+  main{flex:1;padding:24px 32px;display:flex;flex-direction:column;align-items:center;gap:24px}
+  .chart-wrap{background:#111827;border:1px solid #1E3A8A22;border-radius:12px;padding:20px;width:100%;max-width:1200px;text-align:center}
+  .chart-wrap img{width:100%;border-radius:8px;max-width:1160px}
+  .meta{display:flex;gap:32px;flex-wrap:wrap;justify-content:center}
+  .meta-card{background:#111827;border:1px solid #0EA5A422;border-radius:10px;padding:16px 24px;text-align:center;min-width:160px}
+  .meta-card .val{font-size:28px;font-weight:800;color:#22D3EE}
+  .meta-card .key{font-size:12px;color:#9CA3AF;margin-top:4px}
+  .insight{background:#111827;border-left:3px solid #0EA5A4;border-radius:6px;padding:16px 20px;max-width:1000px;font-size:14px;color:#9CA3AF;line-height:1.7}
+  .insight strong{color:#E5E7EB}
+  .tier-legend{display:flex;gap:24px;flex-wrap:wrap;justify-content:center}
+  .tier{display:flex;align-items:center;gap:8px;font-size:13px;color:#9CA3AF}
+  .dot{width:12px;height:12px;border-radius:50%}
+  footer{text-align:center;padding:16px;font-size:12px;color:#9CA3AF;border-top:1px solid #1E3A8A22}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html">&#8592; Back to Dashboard</a>
+  <h1>Global Route Network — Circular (Shell) Layout</h1>
+  <p class="subtitle">Graph Visualization 2 &nbsp;|&nbsp; Shell Layout with 3 Degree Tiers</p>
+</header>
+<main>
+  <div class="meta">
+    <div class="meta-card"><div class="val">265</div><div class="key">Airports (Nodes)</div></div>
+    <div class="meta-card"><div class="val">598</div><div class="key">Routes (Edges)</div></div>
+    <div class="meta-card"><div class="val">3</div><div class="key">Tier Rings</div></div>
+    <div class="meta-card"><div class="val">Shell</div><div class="key">Layout Algorithm</div></div>
+  </div>
+  <div class="tier-legend">
+    <div class="tier"><div class="dot" style="background:#22D3EE"></div>Hub Tier (inner ring)</div>
+    <div class="tier"><div class="dot" style="background:#0EA5A4"></div>Mid Tier (middle ring)</div>
+    <div class="tier"><div class="dot" style="background:#1E3A8A"></div>Peripheral (outer ring)</div>
+  </div>
+  <div class="chart-wrap">
+    <img src="graph_circular.png" alt="Global Route Network - Circular Layout"/>
+  </div>
+  <div class="insight">
+    <strong>Insight:</strong> The shell layout assigns airports to concentric rings based on their total degree.
+    Hub airports occupy the dense inner ring, making the hierarchical tier structure immediately legible.
+    Edge patterns reveal that hubs are densely interconnected while peripheral airports connect only to nearby hubs,
+    forming a classic hub-and-spoke topology characteristic of global airline networks.
+  </div>
+</main>
+<footer>A4 Data Visualization &nbsp;|&nbsp; Theme: Organizational Structure &amp; Global Connectivity</footer>
+</body>
+</html>

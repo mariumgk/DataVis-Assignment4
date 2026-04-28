@@ -1,0 +1,30 @@
+# ── Helper / test scripts (not part of submission) ────────────────────────────
+generate_notebook.py
+rebuild_notebook.py
+run_visualizations.py
+
+# ── Python cache ───────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# ── Jupyter checkpoints ────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+
+# ── Virtual environments ───────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+
+# ── OS files ───────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Editor files ──────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
